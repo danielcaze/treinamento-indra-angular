@@ -2,8 +2,7 @@
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="client-creation-modal" *ngIf="!isModalForEditing">Cadastrar Cliente</h5>
-        <h5 class="modal-title" id="client-creation-modal" *ngIf="isModalForEditing">Editar Cliente</h5>
+        <h5 class="modal-title" id="client-creation-modal">{{isModalForEditing ? "Editar Cliente" : "Cadastrar Cliente" }}</h5>
         <button id="btn-close" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
@@ -33,10 +32,10 @@
           </div>
           <div class="form-floating mb-3" *ngIf="isModalForEditing">
             <select
-            class="form-select"
-            id="isUserActive"
-            aria-label="Usuario ativo"
-            formControlName="ativo"
+              class="form-select"
+              id="isUserActive"
+              aria-label="Usuario ativo"
+              formControlName="ativo"
             >
               <option [ngValue]="true" selected>Sim</option>
               <option [ngValue]="false">Não</option>
@@ -64,7 +63,7 @@
         class="form-select"
         id="orderSelect"
         aria-label="Ordenar por"
-        (change)="ordenarClientesPorCampo($event.target)"
+        (change)="orderClientsByField($event.target)"
         >
           <option value="id" selected>ID</option>
           <option value="nome">Nome</option>
@@ -94,11 +93,11 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let cliente of clientes">
-          <td>{{ cliente.id }}</td>
-          <td>{{ cliente.nome }}</td>
-          <td>{{ cliente.email }}</td>
-          <td>{{ cliente.observacoes }}</td>
+        <tr *ngFor="let client of clients">
+          <td>{{ client.id }}</td>
+          <td>{{ client.nome }}</td>
+          <td>{{ client.email }}</td>
+          <td>{{ client.observacoes }}</td>
           <td>
             <div class="dropdown">
               <button
@@ -113,7 +112,7 @@
                 <li>
                   <button
                   class="dropdown-item"
-                  (click)="buscarCliente(cliente.cpf, cliente.id!)"
+                  (click)="getClientById(client.id!)"
                   type="button"
                   data-bs-toggle="modal"
                   data-bs-target="#creationModal"
@@ -124,12 +123,12 @@
                 <li>
                   <button
                     class="dropdown-item"
-                    (click)="deletarCliente(cliente.id!)"
+                    (click)="handleClientDeletion(client.id!)"
                     type="button"
                   >
-                  Excluir
-                </button>
-              </li>
+                    Excluir
+                  </button>
+                </li>
               </ul>
             </div>
           </td>

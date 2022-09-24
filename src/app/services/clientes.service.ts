@@ -13,23 +13,29 @@ export class ClientesService {
 
   constructor(private http: HttpClient) { }
 
-  listarTodosClientes() {
+  getAllClients() {
     return this.http.get<ICliente[]>(`${this.api}/${this.endpoint}`);
   }
 
-  criarNovoCliente(client: ICliente) {
-    return this.http.post<ICliente>(`${this.api}/${this.endpoint}`, client);
-  }
-
-  deletarCliente(id: number) {
-    return this.http.delete<ICliente>(`${this.api}/${this.endpoint}${id}`);
-  }
-
-  buscarClientePorCpf(cpf: string) {
+  getClientByCpf(cpf: string) {
     return this.http.get<ICliente>(`${this.api}/${this.endpoint}buscarPorCpf/${cpf}`);
   }
 
-  editarClientePorId(id: number, client: ICliente) {
+  getClientById(id: number) {
+    return this.http.get<ICliente>(`${this.api}/${this.endpoint}${id}`);
+  }
+
+  createClient(client: ICliente) {
+    return this.http.post<ICliente>(`${this.api}/${this.endpoint}`, client);
+  }
+
+
+  deleteClientById(id: number) {
+    return this.http.delete<ICliente>(`${this.api}/${this.endpoint}${id}`);
+  }
+
+
+  editClientById(id: number, client: ICliente) {
     return this.http.put<ICliente>(`${this.api}/${this.endpoint}${id}`, client);
   }
 }

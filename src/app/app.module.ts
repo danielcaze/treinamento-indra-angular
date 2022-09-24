@@ -9,6 +9,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { ReactiveFormsModule } from '@angular/forms';
 import { HeaderComponent } from './components/header/header.component';
 import { ContasComponent } from './pages/contas/contas.component';
+import { PaginaComponent } from './pages/clientes/pagina/pagina.component';
 
 @NgModule({
   declarations: [
@@ -16,7 +17,8 @@ import { ContasComponent } from './pages/contas/contas.component';
     ClientesComponent,
     HomeComponent,
     HeaderComponent,
-    ContasComponent
+    ContasComponent,
+    PaginaComponent
   ],
   imports: [
     BrowserModule,

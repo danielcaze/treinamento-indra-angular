@@ -11,16 +11,18 @@ import { ClientesService } from 'src/app/services/clientes.service';
 export class ClientesComponent implements OnInit {
 
   isModalForEditing: boolean = false;
-  actualClienteIdForEdition: number = 0;
+  actualClientIdForEdition: number = 0;
+
+  formInitialValue = { nome: '', email: '', cpf: '', observacoes: '', ativo: true }
 
   status: string | number = "";
   errorMessage: string = "";
 
-  clientes: ICliente[] = [];
+  clients: ICliente[] = [];
 
   constructor(private clienteService: ClientesService, private fb: FormBuilder) { }
 
-  clientForm: any = this.fb.group({
+  clientForm = this.fb.group({
     nome: ['', Validators.required],
     email: ['', [Validators.email, Validators.required]],
     cpf: ['', [
@@ -33,38 +35,38 @@ export class ClientesComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    this.buscarTodosOsClientes();
+    this.getAllClients();
   }
 
   resetForm() {
     this.isModalForEditing = false;
-    this.actualClienteIdForEdition = 0;
-    this.clientForm.patchValue({ nome: '', email: '', cpf: '', observacoes: '', ativo: true });
+    this.actualClientIdForEdition = 0;
+    this.clientForm.patchValue(this.formInitialValue);
   }
 
-  buscarTodosOsClientes() {
-    this.clienteService.listarTodosClientes().subscribe((clientes: ICliente[]) => {
-      this.clientes = clientes;
-      this.ordenarClientesPorCampo();
+  getAllClients() {
+    this.clienteService.getAllClients().subscribe((clientes: ICliente[]) => {
+      this.clients = clientes;
+      this.orderClientsByField();
     });
   }
 
-  criarCliente() {
-    this.clienteService.criarNovoCliente({
-      ...this.clientForm.value
+  handleClientCreation() {
+    this.clienteService.createClient({
+      ...this.clientForm.value,
     } as ICliente)
       .subscribe({
         next: data => {
           this.status = 'Creation successful';
 
-          this.buscarTodosOsClientes();
+          this.getAllClients();
 
-          alert(this.status)
+          alert(this.status);
 
           const close_button: any = document.querySelector('#btn-close');
           close_button!.click();
 
-          this.clientForm.patchValue({ nome: '', email: '', cpf: '', observacoes: '', ativo: true });
+          this.clientForm.patchValue(this.formInitialValue);
         },
         error: error => {
           this.errorMessage = error.message;
@@ -73,13 +75,13 @@ export class ClientesComponent implements OnInit {
       });
   }
 
-  deletarCliente(id: number) {
-    this.clienteService.deletarCliente(id)
+  handleClientDeletion(id: number) {
+    this.clienteService.deleteClientById(id)
       .subscribe({
         next: data => {
           this.status = 'Delete successful';
           alert(this.status)
-          this.buscarTodosOsClientes();
+          this.getAllClients();
         },
         error: error => {
           this.errorMessage = error.message;
@@ -88,9 +90,9 @@ export class ClientesComponent implements OnInit {
       });
   }
 
-  ordenarClientesPorCampo(campo: any = { value: "id" }) {
+  orderClientsByField(campo: any = { value: "id" }) {
     const filtered_field: "id" | "nome" | "email" = campo.value
-    this.clientes.sort((a, b) => {
+    this.clients.sort((a, b) => {
       if (a[filtered_field]! < b[filtered_field]!) {
         return -1;
       }
@@ -108,18 +110,19 @@ export class ClientesComponent implements OnInit {
     }
 
     if (this.isModalForEditing) {
-      this.editarCliente();
+      this.handleClientEdition();
       return;
     }
 
-    this.criarCliente();
+    this.handleClientCreation();
   }
 
-  buscarCliente(cpf: string, id: number) {
+  getClientById(id: number) {
     this.isModalForEditing = true;
-    this.actualClienteIdForEdition = id;
+    this.actualClientIdForEdition = id;
+    this.clientForm.patchValue(this.formInitialValue);
 
-    this.clienteService.buscarClientePorCpf(cpf)
+    this.clienteService.getClientById(id)
       .subscribe({
         next: (cliente: ICliente) => {
           const { nome, observacoes, email, cpf, ativo } = cliente;
@@ -133,7 +136,6 @@ export class ClientesComponent implements OnInit {
           });
         },
         error: error => {
-          this.clientForm.patchValue({ nome: '', email: '', cpf: '', observacoes: '', ativo: true });
           this.errorMessage = error.message;
           console.error('There was an error!', error);
           alert("Erro ao pegar informacoes do cliente");
@@ -141,30 +143,30 @@ export class ClientesComponent implements OnInit {
       })
   }
 
-  editarCliente() {
-    this.clienteService.editarClientePorId(this.actualClienteIdForEdition, {
-      ...this.clientForm.value
+  handleClientEdition() {
+    this.clienteService.editClientById(this.actualClientIdForEdition, {
+      ...this.clientForm.value,
+      id: this.actualClientIdForEdition
     } as ICliente)
       .subscribe({
         next: data => {
           this.status = 'Edition successful';
 
-          this.buscarTodosOsClientes();
+          this.getAllClients();
 
           alert(this.status);
 
           const close_button: any = document.querySelector('#btn-close');
           close_button!.click();
 
-          this.clientForm.patchValue({ nome: '', email: '', cpf: '', observacoes: '', ativo: true });
+          this.clientForm.patchValue(this.formInitialValue);
+          this.actualClientIdForEdition = 0;
+          this.isModalForEditing = false;
         },
         error: error => {
           this.errorMessage = error.message;
           console.error('There was an error!', error);
         }
       });
-
-    this.actualClienteIdForEdition = 0;
-    this.isModalForEditing = false;
   }
 }

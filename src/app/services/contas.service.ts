@@ -13,11 +13,23 @@ export class ContasService {
   endpoint = 'contas/';
   api = environment.api;
 
-  buscarContas() {
+  getAllAccounts() {
     return this.httpService.get<IConta[]>(`${this.api}/${this.endpoint}`);
   }
 
-  deletarConta(id: number) {
-    this.httpService.delete(`${this.api}/${this.endpoint}${id}`);
+  getAccountById(id: number) {
+    return this.httpService.get<IConta>(`${this.api}/${this.endpoint}${id}`);
+  }
+
+  createAccount(account: IConta) {
+    return this.httpService.post<IConta>(`${this.api}/${this.endpoint}`, account);
+  }
+
+  updateAccountById(id: number, account: IConta) {
+    return this.httpService.put<IConta>(`${this.api}/${this.endpoint}${id}`, account);
+  }
+
+  deleteAccountById(id: number) {
+    return this.httpService.delete<IConta>(`${this.api}/${this.endpoint}${id}`);
   }
 }
