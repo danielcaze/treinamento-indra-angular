@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { ICliente } from 'src/app/interfaces/cliente';
+import { AlertaService } from 'src/app/services/alerta.service';
 import { ClientesService } from 'src/app/services/clientes.service';
 import { ContasService } from 'src/app/services/contas.service';
 import { IConta } from '../../interfaces/conta';
@@ -10,7 +11,7 @@ import { IConta } from '../../interfaces/conta';
   templateUrl: './contas.component.html',
   styleUrls: ['./contas.component.css']
 })
-export class ContasComponent implements OnInit {
+export class ContasComponent {
 
   status: string = "";
   errorMessage: string = "";
@@ -35,7 +36,14 @@ export class ContasComponent implements OnInit {
     }
   }
 
-  constructor(private contaService: ContasService, private clienteService: ClientesService, private fb: FormBuilder) { }
+  constructor(
+    private contaService: ContasService,
+    private clienteService: ClientesService,
+    private alertsService: AlertaService,
+    private fb: FormBuilder
+  ) {
+    this.getAllAccounts();
+  }
 
   accountForm = this.fb.group({
     agencia: ['', Validators.required],
@@ -55,10 +63,6 @@ export class ContasComponent implements OnInit {
     })
   });
 
-  ngOnInit(): void {
-    this.getAllAccounts();
-  }
-
   resetForm() {
     this.isModalForEditing = false;
     this.accountForm.patchValue(this.formInitialValue);
@@ -66,7 +70,7 @@ export class ContasComponent implements OnInit {
 
   onSubmit() {
     if (!this.accountForm.valid) {
-      alert("Formulario Invalido");
+      this.alertsService.errorAlert("Formulario Invalido");
       return;
     }
 
@@ -106,7 +110,7 @@ export class ContasComponent implements OnInit {
       error: error => {
         this.errorMessage = error.message;
         console.error(this.errorMessage);
-        alert("Ocorreu um erro ao buscar as informacoes da conta")
+        this.alertsService.errorAlert("Ocorreu um erro ao buscar as informacoes da conta")
       }
     })
   }
@@ -142,7 +146,7 @@ export class ContasComponent implements OnInit {
         this.isClientFetched = false;
         this.errorMessage = error.message;
         console.error("There was an error!" + error.message);
-        alert("Nao existe nenhuma conta vinculada a esse cpf!");
+        this.alertsService.errorAlert("Nao existe nenhuma conta vinculada a esse cpf!");
       }
     })
   }
@@ -157,7 +161,7 @@ export class ContasComponent implements OnInit {
 
           this.getAllAccounts();
 
-          alert(this.status);
+          this.alertsService.successAlert(this.status);
 
           const close_button: any = document.querySelector('#btn-close');
           close_button!.click();
@@ -182,7 +186,7 @@ export class ContasComponent implements OnInit {
 
           this.getAllAccounts();
 
-          alert(this.status);
+          this.alertsService.successAlert(this.status);
 
           const close_button: any = document.querySelector('#btn-close');
           close_button!.click();
@@ -203,7 +207,7 @@ export class ContasComponent implements OnInit {
       .subscribe({
         next: data => {
           this.status = 'Delete successful';
-          alert(this.status)
+          this.alertsService.successAlert(this.status)
           this.getAllAccounts();
         },
         error: error => {

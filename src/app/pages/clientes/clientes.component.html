@@ -1,4 +1,4 @@
-<div class="modal fade" id="creationModal" tabindex="-1" aria-labelledby="Client creation modal" aria-hidden="true">
+<!-- <div class="modal fade" id="creationModal" tabindex="-1" aria-labelledby="Client creation modal" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
@@ -136,4 +136,20 @@
       </tbody>
     </table>
   </div>
+</div> -->
+<form [formGroup]="clientForm" (ngSubmit)="onSubmit()">
+  <app-transaction-modal
+    [is_open]="is_modal_open"
+    [type]="modal_type"
+    (onModalClose)="resetForm()"
+    (onModalSubmit)="handleSubmitModal()"
+  ></app-transaction-modal>
+  <button #submit_button type="submit" class="hidden-button-submit"></button>
+</form>
+<div>
+  <app-table
+    [clients]="clients"
+    (client_deletion)="handleDeleteModalOpen($event)"
+    (get_client_by_id)="handleUpdateModalOpen($event)"
+  ></app-table>
 </div>

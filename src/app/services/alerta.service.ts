@@ -24,7 +24,7 @@ export class AlertaService {
     })
   }
 
-  waningAlert(message: string) {
+  warningAlert(message: string) {
     Swal.fire({
       title: "Wait!",
       text: message,

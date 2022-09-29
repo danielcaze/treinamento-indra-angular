@@ -1,0 +1,197 @@
+<div
+    class="modal-overlay"
+    *ngIf="is_open===true"
+    #modal_overlay
+    [formGroup]="form"
+>
+    <div
+        class="modal modal-content"
+        #modal
+    >
+        <button
+            type="button"
+            class="modal-close"
+            (click)="handleCloseModal()"
+        >
+            <fa-icon [icon]="closeIcon"></fa-icon>
+        </button>
+
+        <div class="modal-container" *ngIf="page.includes('clients') && type==='delete'">
+            <h2>{{ "Delete client " + form.value.nome + " ?"}}</h2>
+
+            <div class="transaction-type-container">
+                <button
+                    type="button"
+                    class="radiobox"
+                    (click)="handleCloseModal()"
+                >
+                    <fa-icon [icon]="closeIcon" style="font-size: 20px; color: #33CC95"></fa-icon>
+                    <span>Cancel</span>
+                </button>
+                <button
+                    type="submit"
+                    class="radiobox"                      
+                >
+                    <fa-icon [icon]="trashIcon" style="font-size: 20px; color: #E52E4D"></fa-icon>
+                    <span>Delete</span>
+                </button>
+            </div>
+            
+        </div>
+        
+        <div class="modal-container" *ngIf="page.includes('clients') && type!=='delete'">
+            <h2>{{ type==='update' ? "Update client " + form.value.nome : "Register client"}}</h2>
+
+            <label for="client_name">Name:</label>
+            <input
+                id="client_name"
+                type="text"
+                placeholder="Name"
+                formControlName="nome"
+            />
+
+            <label for="client_email">Email:</label>
+            <input
+                id="client_email"
+                type="email"
+                placeholder="E-mail"
+                formControlName="email"
+            />
+
+            <label for="client_cpf">CPF:</label>
+            <input
+                id="client_cpf"
+                type="tel"
+                placeholder="CPF"
+                formControlName="cpf"
+                maxLength="11"
+            />
+
+            <label for="client_observations">Observations:</label>
+            <textarea
+                id="client_observations"
+                placeholder="Observations"
+                formControlName="observacoes"
+            ></textarea>
+
+            <label for="client_cpf" *ngIf="type==='update'">Active:</label>
+            <select
+                id="client_cpf"
+                *ngIf="type==='update'"
+                aria-label="Usuario ativo"
+                formControlName="ativo"
+            >
+              <option [ngValue]="true" selected>Yes</option>
+              <option [ngValue]="false">No</option>
+            </select>
+
+            <button
+                type="button"
+                class="submit-button"
+                (click)="handleModalSubmit()"
+                [disabled]="!form.valid"
+            >
+                Submit
+            </button>
+        </div>
+
+        <div class="modal-container" *ngIf="page.includes('accounts')">
+            <h2>Register transaction</h2>
+
+            <input
+                type="text"
+                placeholder="Title"
+                formControlName="nome"
+            />
+
+            <input
+                type="number"
+                placeholder="Value"
+            />
+
+            <div class="transaction-type-container">
+                <button
+                    type="button"
+                    class="radiobox"
+                ><!--onClick={() => setType("deposit")}
+                    isActive={type === "deposit"}
+                    activeColor="green"-->
+                    <img src="../../../assets/images/income.svg" alt="Income" />
+                    <span>Income</span>
+                </button>
+                <button
+                    type="button"
+                    class="radiobox"                       
+                ><!--onClick={() => setType("withdraw")}
+                    isActive={type === "withdraw"}
+                    activeColor="red"-->
+                    <img src="../../../assets/images/outcome.svg" alt="Outcome" />
+                    <span>Outcome</span>
+                </button>
+            </div>
+
+            <input
+                type="text"
+                placeholder="Category"
+            />
+
+            <button
+                type="button"
+                class="submit-button"
+                (click)="handleModalSubmit()"
+            >
+                Submit
+            </button>
+        </div>
+
+        <div class="modal-container" *ngIf="page.includes('extract')">
+            <h2>Register transaction</h2>
+
+            <input
+                type="text"
+                placeholder="Title"
+                formControlName="nome"
+            />
+
+            <input
+                type="number"
+                placeholder="Value"
+            />
+
+            <div class="transaction-type-container">
+                <button
+                    type="button"
+                    class="radiobox"
+                ><!--onClick={() => setType("deposit")}
+                    isActive={type === "deposit"}
+                    activeColor="green"-->
+                    <img src="../../../assets/images/income.svg" alt="Income" />
+                    <span>Income</span>
+                </button>
+                <button
+                    type="button"
+                    class="radiobox"                       
+                ><!--onClick={() => setType("withdraw")}
+                    isActive={type === "withdraw"}
+                    activeColor="red"-->
+                    <img src="../../../assets/images/outcome.svg" alt="Outcome" />
+                    <span>Outcome</span>
+                </button>
+            </div>
+
+            <input
+                type="text"
+                placeholder="Category"
+            />
+
+            <button
+                type="button"
+                class="submit-button"
+                (click)="handleModalSubmit()"
+            >
+                Submit
+            </button>
+        </div>
+
+    </div>
+</div>

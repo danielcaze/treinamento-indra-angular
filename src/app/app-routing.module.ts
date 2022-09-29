@@ -10,14 +10,17 @@ const routes: Routes = [
     path: '', component: HomeComponent
   },
   {
-    path: 'clientes', component: ClientesComponent
+    path: 'clients', component: ClientesComponent
   },
   {
-    path: 'contas', component: ContasComponent
+    path: 'accounts', component: ContasComponent
   },
   {
-    path: 'cliente/:id', component: PaginaComponent
+    path: 'client/:id', component: PaginaComponent
   }
+  // {
+  //   path: 'extract', component: PaginaComponent
+  // }
 ];
 
 @NgModule({

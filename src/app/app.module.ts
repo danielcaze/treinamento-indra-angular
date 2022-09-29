@@ -6,10 +6,14 @@ import { AppComponent } from './app.component';
 import { ClientesComponent } from './pages/clientes/clientes.component';
 import { HomeComponent } from './pages/home/home.component';
 import { HttpClientModule } from '@angular/common/http';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormGroupDirective, ReactiveFormsModule } from '@angular/forms';
 import { HeaderComponent } from './components/header/header.component';
 import { ContasComponent } from './pages/contas/contas.component';
 import { PaginaComponent } from './pages/clientes/pagina/pagina.component';
+import { SummaryComponent } from './components/summary/summary.component';
+import { TransactionModalComponent } from './components/transaction-modal/transaction-modal.component';
+import { TableComponent } from './components/table/table.component';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 
 @NgModule({
   declarations: [
@@ -18,15 +22,22 @@ import { PaginaComponent } from './pages/clientes/pagina/pagina.component';
     HomeComponent,
     HeaderComponent,
     ContasComponent,
-    PaginaComponent
+    PaginaComponent,
+    SummaryComponent,
+    TransactionModalComponent,
+    TableComponent
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
     HttpClientModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    FontAwesomeModule
   ],
-  providers: [],
+  providers: [
+    ClientesComponent,
+    FormGroupDirective
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

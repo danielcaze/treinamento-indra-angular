@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ICliente } from 'src/app/interfaces/cliente';
+import { AlertaService } from 'src/app/services/alerta.service';
 import { ClientesService } from 'src/app/services/clientes.service';
 
 @Component({
@@ -20,7 +21,7 @@ export class PaginaComponent implements OnInit {
     observacoes: "",
   }
 
-  constructor(private route: ActivatedRoute, private clienteService: ClientesService) { }
+  constructor(private route: ActivatedRoute, private alertsService: AlertaService, private clienteService: ClientesService) { }
 
   ngOnInit(): void {
     this.client_id = Number(this.route.snapshot.paramMap.get('id'))
@@ -35,7 +36,7 @@ export class PaginaComponent implements OnInit {
         this.client = client
       },
       error: (err) => {
-        console.log(err);
+        console.error(err);
       }
     })
   }

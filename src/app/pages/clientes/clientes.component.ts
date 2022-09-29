@@ -1,8 +1,11 @@
-import { Component, OnInit } from '@angular/core';
-import { FormBuilder, Validators } from '@angular/forms';
+import { Component, OnInit, ElementRef, ViewChild, Renderer2 } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ICliente } from 'src/app/interfaces/cliente';
+import { AlertaService } from 'src/app/services/alerta.service';
 import { ClientesService } from 'src/app/services/clientes.service';
+import { DataService } from 'src/app/services/data.service';
 
+let clients: ICliente[] = [];
 @Component({
   selector: 'app-clientes',
   templateUrl: './clientes.component.html',
@@ -10,89 +13,105 @@ import { ClientesService } from 'src/app/services/clientes.service';
 })
 export class ClientesComponent implements OnInit {
 
-  isModalForEditing: boolean = false;
-  actualClientIdForEdition: number = 0;
+  @ViewChild('submit_button') submit_button: ElementRef;
 
-  formInitialValue = { nome: '', email: '', cpf: '', observacoes: '', ativo: true }
+  is_modal_open: boolean = false;
+  modal_type: "create" | "update" | "delete" | "" = ""
+  actual_client_id: number = 0;
+
+  clientForm: FormGroup;
+  form_initial_value = { nome: '', email: '', cpf: '', observacoes: '', ativo: true }
 
   status: string | number = "";
-  errorMessage: string = "";
+  error_message: string = "";
 
-  clients: ICliente[] = [];
+  clients: ICliente[] = clients;
 
-  constructor(private clienteService: ClientesService, private fb: FormBuilder) { }
+  constructor(
+    private clientsService: ClientesService,
+    private alertsService: AlertaService,
+    private fb: FormBuilder,
+    private renderer: Renderer2,
+    private dataeService: DataService
+  ) {
+    this.dataeService.clickCreate().subscribe(() => { this.handleCreateModalOpen() });
 
-  clientForm = this.fb.group({
-    nome: ['', Validators.required],
-    email: ['', [Validators.email, Validators.required]],
-    cpf: ['', [
-      Validators.required,
-      Validators.minLength(11),
-      Validators.maxLength(11),
-    ]],
-    observacoes: [''],
-    ativo: [true, this.isModalForEditing && Validators.required]
-  });
-
-  ngOnInit(): void {
     this.getAllClients();
-  }
 
-  resetForm() {
-    this.isModalForEditing = false;
-    this.actualClientIdForEdition = 0;
-    this.clientForm.patchValue(this.formInitialValue);
-  }
-
-  getAllClients() {
-    this.clienteService.getAllClients().subscribe((clientes: ICliente[]) => {
-      this.clients = clientes;
-      this.orderClientsByField();
+    this.clientForm = this.fb.group({
+      nome: ['', Validators.required],
+      email: ['', [Validators.email, Validators.required]],
+      cpf: ['', [
+        Validators.required,
+        Validators.minLength(11),
+        Validators.maxLength(11),
+      ]],
+      observacoes: [''],
+      ativo: [true, this.modal_type === "update" && Validators.required]
     });
   }
 
-  handleClientCreation() {
-    this.clienteService.createClient({
-      ...this.clientForm.value,
-    } as ICliente)
-      .subscribe({
-        next: data => {
-          this.status = 'Creation successful';
-
-          this.getAllClients();
-
-          alert(this.status);
-
-          const close_button: any = document.querySelector('#btn-close');
-          close_button!.click();
-
-          this.clientForm.patchValue(this.formInitialValue);
-        },
-        error: error => {
-          this.errorMessage = error.message;
-          console.error('There was an error!', error);
-        }
-      });
+  ngOnInit(): void {
   }
 
-  handleClientDeletion(id: number) {
-    this.clienteService.deleteClientById(id)
+  handleCloseModal() {
+    this.is_modal_open = false;
+    this.modal_type = "";
+  }
+
+  handleCreateModalOpen() {
+    this.modal_type = "create";
+    this.is_modal_open = true;
+  }
+
+  handleUpdateModalOpen(id: number) {
+    this.resetForm();
+    this.actual_client_id = id;
+    this.modal_type = "update"
+    this.is_modal_open = true;
+
+    this.clientsService.getClientById(id)
       .subscribe({
-        next: data => {
-          this.status = 'Delete successful';
-          alert(this.status)
-          this.getAllClients();
+        next: (cliente: ICliente) => {
+          const { id, ...rest } = cliente;
+          this.clientForm.patchValue({
+            ...rest
+          });
         },
         error: error => {
-          this.errorMessage = error.message;
+          this.error_message = error.message;
           console.error('There was an error!', error);
+          this.alertsService.errorAlert("Error getting client information.");
         }
-      });
+      })
+  }
+
+  handleDeleteModalOpen(id: number) {
+    this.resetForm();
+    this.actual_client_id = id;
+    this.modal_type = "delete"
+    this.is_modal_open = true;
+
+    this.clientsService.getClientById(id)
+      .subscribe({
+        next: (cliente: ICliente) => {
+          const { id, ...rest } = cliente
+          this.clientForm.patchValue({ ...rest });
+        },
+        error: error => {
+          this.error_message = error.message;
+          console.error('There was an error!', this.error_message);
+        }
+      })
+  }
+
+  handleSubmitModal() {
+    this.renderer.selectRootElement(this.submit_button["nativeElement"]).click();
   }
 
   orderClientsByField(campo: any = { value: "id" }) {
     const filtered_field: "id" | "nome" | "email" = campo.value
-    this.clients.sort((a, b) => {
+    clients.sort((a, b) => {
       if (a[filtered_field]! < b[filtered_field]!) {
         return -1;
       }
@@ -103,70 +122,99 @@ export class ClientesComponent implements OnInit {
     });
   }
 
-  onSubmit() {
-    if (!this.clientForm.valid) {
-      alert("Formulario Invalido");
-      return;
-    }
-
-    if (this.isModalForEditing) {
-      this.handleClientEdition();
-      return;
-    }
-
-    this.handleClientCreation();
+  resetForm() {
+    this.handleCloseModal();
+    this.actual_client_id = 0;
+    this.clientForm.patchValue(this.form_initial_value);
   }
 
-  getClientById(id: number) {
-    this.isModalForEditing = true;
-    this.actualClientIdForEdition = id;
-    this.clientForm.patchValue(this.formInitialValue);
+  getAllClients() {
+    this.clientsService.getAllClients().subscribe((clientes: ICliente[]) => {
+      this.clients = clientes;
+      this.orderClientsByField();
+    });
+  }
 
-    this.clienteService.getClientById(id)
+  handleClientCreation() {
+    this.clientsService.createClient({
+      ...this.clientForm.value,
+    } as ICliente)
       .subscribe({
-        next: (cliente: ICliente) => {
-          const { nome, observacoes, email, cpf, ativo } = cliente;
-
-          this.clientForm.patchValue({
-            nome,
-            observacoes,
-            email,
-            cpf,
-            ativo
-          });
+        next: data => {
+          this.status = 'Creation successful';
+          this.getAllClients();
+          this.alertsService.successAlert(this.status);
+          this.resetForm();
         },
         error: error => {
-          this.errorMessage = error.message;
-          console.error('There was an error!', error);
-          alert("Erro ao pegar informacoes do cliente");
+          this.error_message = error.message;
+          console.error('There was an error!', this.error_message);
+          this.alertsService.errorAlert("Error creating client");
         }
-      })
+      });
   }
 
-  handleClientEdition() {
-    this.clienteService.editClientById(this.actualClientIdForEdition, {
+  handleClientUpdate() {
+    this.clientsService.updateClientById({
       ...this.clientForm.value,
-      id: this.actualClientIdForEdition
+      id: this.actual_client_id
     } as ICliente)
       .subscribe({
         next: data => {
           this.status = 'Edition successful';
-
           this.getAllClients();
-
-          alert(this.status);
-
-          const close_button: any = document.querySelector('#btn-close');
-          close_button!.click();
-
-          this.clientForm.patchValue(this.formInitialValue);
-          this.actualClientIdForEdition = 0;
-          this.isModalForEditing = false;
+          this.alertsService.successAlert(this.status);
+          this.resetForm();
         },
         error: error => {
-          this.errorMessage = error.message;
-          console.error('There was an error!', error);
+          this.error_message = error.message;
+          console.error('There was an error!', this.error_message);
+          this.alertsService.errorAlert("Error updating client");
         }
       });
   }
+
+  handleClientDeletion() {
+    this.clientsService.deleteClientById(this.actual_client_id)
+      .subscribe({
+        next: data => {
+          this.status = 'Delete successful';
+          this.alertsService.successAlert(this.status);
+          this.getAllClients();
+          this.resetForm();
+        },
+        error: error => {
+          this.error_message = error.message;
+          console.error('There was an error!', error);
+          this.alertsService.errorAlert("Error deleting client");
+        }
+      });
+  }
+
+  onSubmit() {
+    if (!this.clientForm.valid) {
+      if (this.modal_type === "delete") {
+        this.handleClientDeletion();
+        return;
+      }
+      this.alertsService.warningAlert("Invalid Form");
+      return;
+    }
+
+    if (this.modal_type === "delete") {
+      this.handleClientDeletion();
+      return;
+    }
+
+    if (this.modal_type === "update") {
+      this.handleClientUpdate();
+      return;
+    }
+
+    if (this.modal_type === "create") {
+      this.handleClientCreation();
+    }
+  }
 }
+
+export default clients
