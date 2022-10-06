@@ -45,7 +45,7 @@
                     <td>{{ client.nome }}</td>
                     <td>{{ client.email }}</td>
                     <td>{{ client.observacoes }}</td>
-                    <td>
+                    <td class="icons">
                         <button
                             class="action-button"
                             title="Update client"
@@ -59,6 +59,13 @@
                             (click)="handleDeleteClient(client.id!)"
                         >
                             <fa-icon [icon]="trashIcon" style="font-size: 17px"></fa-icon>
+                        </button>
+                        <button
+                            class="action-button"
+                            title="Create account"
+                            (click)="handleCreateAccount(client)"
+                        >
+                            <fa-icon [icon]="plusIcon" style="font-size: 17px"></fa-icon>
                         </button>
                     </td>
                 </tr>

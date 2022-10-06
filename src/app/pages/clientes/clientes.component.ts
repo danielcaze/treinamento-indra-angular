@@ -1,8 +1,10 @@
 import { Component, OnInit, ElementRef, ViewChild, Renderer2 } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ICliente } from 'src/app/interfaces/cliente';
+import { IConta } from 'src/app/interfaces/conta';
 import { AlertaService } from 'src/app/services/alerta.service';
 import { ClientesService } from 'src/app/services/clientes.service';
+import { ContasService } from 'src/app/services/contas.service';
 import { DataService } from 'src/app/services/data.service';
 
 let clients: ICliente[] = [];
@@ -16,11 +18,12 @@ export class ClientesComponent implements OnInit {
   @ViewChild('submit_button') submit_button: ElementRef;
 
   is_modal_open: boolean = false;
-  modal_type: "create" | "update" | "delete" | "" = ""
+  modal_type: "create" | "update" | "delete" | "account" | ""
+  clientName: string;
   actual_client_id: number = 0;
 
   clientForm: FormGroup;
-  form_initial_value = { nome: '', email: '', cpf: '', observacoes: '', ativo: true }
+  form_initial_value: ICliente = { nome: '', email: '', cpf: '', observacoes: '', ativo: true }
 
   status: string | number = "";
   error_message: string = "";
@@ -29,6 +32,7 @@ export class ClientesComponent implements OnInit {
 
   constructor(
     private clientsService: ClientesService,
+    private contasService: ContasService,
     private alertsService: AlertaService,
     private fb: FormBuilder,
     private renderer: Renderer2,
@@ -47,11 +51,37 @@ export class ClientesComponent implements OnInit {
         Validators.maxLength(11),
       ]],
       observacoes: [''],
-      ativo: [true, this.modal_type === "update" && Validators.required]
+      ativo: [true]
     });
   }
 
+
   ngOnInit(): void {
+    this.clientForm.get('cpf')!.valueChanges.subscribe(val => {
+      if (this.modal_type === 'account') {
+        this.clientForm.controls['cpf'].setValidators([
+          Validators.required,
+          Validators.minLength(6),
+          Validators.maxLength(6)
+        ]);
+        return this.clientForm.controls['cpf'].updateValueAndValidity();
+      } else {
+        this.clientForm.controls['cpf'].setValidators([
+          Validators.required,
+          Validators.minLength(11),
+          Validators.maxLength(11),
+        ]);
+        return this.clientForm.controls['cpf'].updateValueAndValidity();
+      }
+    });
+    this.clientForm.get('ativo')!.valueChanges.subscribe(val => {
+      if (this.modal_type === "update") {
+        this.clientForm.controls['ativo'].setValidators([Validators.required]);
+      } else {
+        this.clientForm.controls['ativo'].clearValidators();
+      }
+      this.clientForm.controls['ativo'].updateValueAndValidity();
+    });
   }
 
   handleCloseModal() {
@@ -60,6 +90,7 @@ export class ClientesComponent implements OnInit {
   }
 
   handleCreateModalOpen() {
+    this.resetForm();
     this.modal_type = "create";
     this.is_modal_open = true;
   }
@@ -74,6 +105,7 @@ export class ClientesComponent implements OnInit {
       .subscribe({
         next: (cliente: ICliente) => {
           const { id, ...rest } = cliente;
+          this.clientName = rest.nome;
           this.clientForm.patchValue({
             ...rest
           });
@@ -96,6 +128,7 @@ export class ClientesComponent implements OnInit {
       .subscribe({
         next: (cliente: ICliente) => {
           const { id, ...rest } = cliente
+          this.clientName = rest.nome;
           this.clientForm.patchValue({ ...rest });
         },
         error: error => {
@@ -103,6 +136,26 @@ export class ClientesComponent implements OnInit {
           console.error('There was an error!', this.error_message);
         }
       })
+  }
+
+  handleCreateAccountByClientModalOpen(client: ICliente) {
+    this.resetForm();
+    this.modal_type = "account"
+    this.is_modal_open = true;
+
+    this.clientsService.getClientById(client.id!).subscribe({
+      next: client => {
+        const { id, ...rest } = client
+        this.clientName = rest.nome;
+        this.form_initial_value = rest
+        this.actual_client_id = id!
+        this.clientForm.patchValue({ ...this.clientForm, email: rest.email });
+      },
+      error: error => {
+        this.error_message = error.message;
+        console.error('There was an error!', error);
+      }
+    })
   }
 
   handleSubmitModal() {
@@ -123,6 +176,8 @@ export class ClientesComponent implements OnInit {
   }
 
   resetForm() {
+    this.clientName = "";
+    this.form_initial_value = { nome: '', email: '', cpf: '', observacoes: '', ativo: true }
     this.handleCloseModal();
     this.actual_client_id = 0;
     this.clientForm.patchValue(this.form_initial_value);
@@ -191,6 +246,27 @@ export class ClientesComponent implements OnInit {
       });
   }
 
+  handleAccountCreationByClient() {
+    this.contasService.createAccount({
+      cliente: { ...this.form_initial_value, id: this.actual_client_id },
+      numero: this.clientForm.value.cpf,
+      agencia: this.clientForm.value.nome,
+      saldo: this.clientForm.value.observacoes ? Number(this.clientForm.value.observacoes) : 0
+    } as IConta).subscribe({
+      next: data => {
+        this.form_initial_value = { nome: '', email: '', cpf: '', observacoes: '', ativo: true }
+        this.status = 'Creation successful';
+        this.alertsService.successAlert(this.status);
+        this.resetForm();
+      },
+      error: error => {
+        this.error_message = error.message;
+        console.error('There was an error!', this.error_message);
+        this.alertsService.errorAlert("Error creating account");
+      }
+    })
+  }
+
   onSubmit() {
     if (!this.clientForm.valid) {
       if (this.modal_type === "delete") {
@@ -213,6 +289,10 @@ export class ClientesComponent implements OnInit {
 
     if (this.modal_type === "create") {
       this.handleClientCreation();
+    }
+
+    if (this.modal_type === "account") {
+      this.handleAccountCreationByClient();
     }
   }
 }

@@ -1,8 +1,8 @@
 <div class="container">
     <div class="content">
         <img src="../../../assets/images/logo.svg" alt="dt money" />
-        <button type="button" (click)="create()"><!--onClick={onOpenNewTransactionModal}-->
-            New transaction
+        <button type="button" (click)="create()" *ngIf="!page.includes('extracts')"><!--onClick={onOpenNewTransactionModal}-->
+           {{page.includes('accounts') ? "Create Account" : page.includes('clients') && "Create Client"}}
         </button>
     </div>
 </div>

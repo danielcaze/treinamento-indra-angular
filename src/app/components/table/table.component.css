@@ -47,3 +47,8 @@
 .table-container table .action-button:hover {
     filter: brightness(0.2);
 }
+
+.icons {
+  display: flex;
+  align-items: center;
+}

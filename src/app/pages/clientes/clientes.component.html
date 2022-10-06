@@ -141,6 +141,7 @@
   <app-transaction-modal
     [is_open]="is_modal_open"
     [type]="modal_type"
+    [client_name]="clientName"
     (onModalClose)="resetForm()"
     (onModalSubmit)="handleSubmitModal()"
   ></app-transaction-modal>
@@ -149,7 +150,8 @@
 <div>
   <app-table
     [clients]="clients"
-    (client_deletion)="handleDeleteModalOpen($event)"
-    (get_client_by_id)="handleUpdateModalOpen($event)"
+    (clientDeletion)="handleDeleteModalOpen($event)"
+    (getClientById)="handleUpdateModalOpen($event)"
+    (accountCreation)="handleCreateAccountByClientModalOpen($event)"
   ></app-table>
 </div>

@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { ICliente } from 'src/app/interfaces/cliente';
 import { IConta } from 'src/app/interfaces/conta';
-import { faTrash, faPencil } from '@fortawesome/free-solid-svg-icons';
+import { faTrash, faPencil, faPlus } from '@fortawesome/free-solid-svg-icons';
 import { Router } from '@angular/router';
 
 @Component({
@@ -14,27 +14,33 @@ export class TableComponent implements OnInit {
   @Input() clients: ICliente[] = [];
   @Input() accounts: IConta[] = [];
 
-  @Output() client_deletion: EventEmitter<any> = new EventEmitter();
-  @Output() get_client_by_id: EventEmitter<any> = new EventEmitter();
+  @Output() clientDeletion: EventEmitter<any> = new EventEmitter();
+  @Output() getClientById: EventEmitter<any> = new EventEmitter();
+  @Output() accountCreation: EventEmitter<any> = new EventEmitter();
 
   trashIcon = faTrash;
   pencilIcon = faPencil;
+  plusIcon = faPlus;
 
   page: string;
 
   constructor(private route: Router) {
-    this.page = String(this.route.url)
+    this.page = String(this.route.url);
   }
 
   ngOnInit(): void {
   }
 
   handleDeleteClient(id: number) {
-    this.client_deletion.emit(id)
+    this.clientDeletion.emit(id);
   }
 
   handleGetClientById(id: number) {
-    this.get_client_by_id.emit(id)
+    this.getClientById.emit(id);
+  }
+
+  handleCreateAccount(client: ICliente) {
+    this.accountCreation.emit(client);
   }
 
 }

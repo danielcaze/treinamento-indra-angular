@@ -1,4 +1,4 @@
-import { Component, ElementRef, EventEmitter, HostListener, Input, OnInit, Output, Renderer2, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, HostListener, Input, OnInit, Output, Renderer2, SimpleChanges, ViewChild } from '@angular/core';
 import { FormGroup, FormGroupDirective } from '@angular/forms';
 import { Router } from '@angular/router';
 import { faX, faTrash } from '@fortawesome/free-solid-svg-icons';
@@ -12,7 +12,8 @@ import { faX, faTrash } from '@fortawesome/free-solid-svg-icons';
 export class TransactionModalComponent implements OnInit {
 
   @Input() is_open: boolean = false;
-  @Input() type: "create" | "update" | "delete" | "";
+  @Input() type: "create" | "update" | "delete" | "account" | "";
+  @Input() client_name: string;
 
   @Output() onModalClose: EventEmitter<() => void> = new EventEmitter();
   @Output() onModalSubmit: EventEmitter<() => void> = new EventEmitter();

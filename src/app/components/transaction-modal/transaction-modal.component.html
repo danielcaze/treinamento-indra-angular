@@ -17,7 +17,7 @@
         </button>
 
         <div class="modal-container" *ngIf="page.includes('clients') && type==='delete'">
-            <h2>{{ "Delete client " + form.value.nome + " ?"}}</h2>
+            <h2>{{ "Delete client " + client_name + " ?"}}</h2>
 
             <div class="transaction-type-container">
                 <button
@@ -30,17 +30,17 @@
                 </button>
                 <button
                     type="submit"
-                    class="radiobox"                      
+                    class="radiobox"
                 >
                     <fa-icon [icon]="trashIcon" style="font-size: 20px; color: #E52E4D"></fa-icon>
                     <span>Delete</span>
                 </button>
             </div>
-            
+
         </div>
-        
-        <div class="modal-container" *ngIf="page.includes('clients') && type!=='delete'">
-            <h2>{{ type==='update' ? "Update client " + form.value.nome : "Register client"}}</h2>
+
+        <div class="modal-container" *ngIf="page.includes('clients') && (type!=='delete' && type!=='account')">
+            <h2>{{ type==='update' ? "Update client " + client_name : "Register client"}}</h2>
 
             <label for="client_name">Name:</label>
             <input
@@ -76,7 +76,7 @@
 
             <label for="client_cpf" *ngIf="type==='update'">Active:</label>
             <select
-                id="client_cpf"
+                id="client_active"
                 *ngIf="type==='update'"
                 aria-label="Usuario ativo"
                 formControlName="ativo"
@@ -84,6 +84,44 @@
               <option [ngValue]="true" selected>Yes</option>
               <option [ngValue]="false">No</option>
             </select>
+
+            <button
+                type="button"
+                class="submit-button"
+                (click)="handleModalSubmit()"
+                [disabled]="!form.valid"
+            >
+                Submit
+            </button>
+        </div>
+
+        <div class="modal-container" *ngIf="page.includes('clients') && type==='account'">
+            <h2>Create Account {{client_name ? "for " + client_name : ""}}</h2>
+
+            <label for="account_number">Agency:</label>
+            <input
+                id="account_number"
+                type="text"
+                placeholder="Number"
+                formControlName="nome"
+                maxLength="4"
+            />
+
+            <label for="account_agency">Acc. number:</label>
+            <input
+                id="account_agency"
+                type="tel"
+                placeholder="Agency"
+                formControlName="cpf"
+                maxLength="6"
+            />
+
+            <label for="client_observations">Observations:</label>
+            <textarea
+                id="client_observations"
+                placeholder="Observations"
+                formControlName="observacoes"
+            ></textarea>
 
             <button
                 type="button"
@@ -121,7 +159,7 @@
                 </button>
                 <button
                     type="button"
-                    class="radiobox"                       
+                    class="radiobox"
                 ><!--onClick={() => setType("withdraw")}
                     isActive={type === "withdraw"}
                     activeColor="red"-->
@@ -170,7 +208,7 @@
                 </button>
                 <button
                     type="button"
-                    class="radiobox"                       
+                    class="radiobox"
                 ><!--onClick={() => setType("withdraw")}
                     isActive={type === "withdraw"}
                     activeColor="red"-->
