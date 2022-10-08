@@ -1,9 +1,10 @@
 <div class="summary-container">
     <a routerLink="/clients" routerLinkActive="active">
-        <div>
+        <div [ngClass]="page.includes('clients') ? 'highlight-background' : ''">
             <header>
-                <p>Clients</p>
-                <img src='../../../assets/images/income.svg' alt="clients-icon" />
+                <p>Manage</p>
+                <fa-icon [icon]="clients" [ngStyle]="{'font-size': '32px', 'color': page.includes('clients') ? '#ffffff' : '#5429CC'}"></fa-icon>
+
             </header>
             <strong>
                 Clients
@@ -11,10 +12,10 @@
         </div>
     </a>
     <a routerLink="/accounts" routerLinkActive="active">
-        <div>
+        <div [ngClass]="page.includes('accounts') ? 'highlight-background' : ''">
             <header>
-                <p>Accounts</p>
-                <img src='../../../assets/images/outcome.svg' alt="accounts-icon" />
+                <p>Manage</p>
+                <fa-icon [icon]="bank" [ngStyle]="{'font-size': '32px', 'color': page.includes('accounts') ? '#ffffff' : '#5429CC'}"></fa-icon>
             </header>
             <strong>
                 Accounts
@@ -22,10 +23,10 @@
         </div>
     </a>
     <a routerLink="/extract" routerLinkActive="active">
-        <div class="highlight-background">
+        <div [ngClass]="page.includes('extract') ? 'highlight-background' : ''">
             <header>
-                <p>Extract</p>
-                <img src="../../../assets/images/total.svg" alt="extract-icon" />
+                <p>View</p>
+                <fa-icon [icon]="dollar" [ngStyle]="{'font-size': '32px', 'color': page.includes('extract') ? '#ffffff' : '#5429CC'}"></fa-icon>
             </header>
             <strong>
                 Extract

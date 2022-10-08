@@ -14,9 +14,12 @@ export class TransactionModalComponent implements OnInit {
   @Input() is_open: boolean = false;
   @Input() type: "create" | "update" | "delete" | "account" | "";
   @Input() client_name: string;
+  @Input() account_data: { number: string, agency: string };
+  @Input() is_client_fetched: boolean;
 
   @Output() onModalClose: EventEmitter<() => void> = new EventEmitter();
   @Output() onModalSubmit: EventEmitter<() => void> = new EventEmitter();
+  @Output() checkClientCpf: EventEmitter<() => void> = new EventEmitter();
 
   @ViewChild('modal') modal: ElementRef;
   @ViewChild('modal_overlay') modal_overlay: ElementRef;
@@ -56,5 +59,9 @@ export class TransactionModalComponent implements OnInit {
 
   handleCloseModal() {
     this.onModalClose.emit();
+  }
+
+  handleCheckClientCpf() {
+    this.checkClientCpf.emit();
   }
 }

@@ -57,7 +57,7 @@
     font-size: 1rem;
     margin-top: 1.5rem;
 
-    transition: filter 0.2s; 
+    transition: filter 0.2s;
 }
 
 .modal-container button.submit-button:hover {
@@ -67,13 +67,17 @@
 .modal-container button.submit-button:disabled {
     cursor: not-allowed;
     filter: brightness(0.7)
-} 
+}
+
+.modal-container .margin-16 {
+  margin-block: 1.6rem;
+}
 
 .transaction-type-container {
     margin: 1rem 0;
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: .5rem; 
+    gap: .5rem;
 }
 
 /* interface RadioBoxProps {
@@ -99,7 +103,7 @@ const colors = {
 
 .radiobox:hover {
     border-color: rgba(220, 220, 220, 1)
-} 
+}
 
 .radiobox img {
     width: 20px;

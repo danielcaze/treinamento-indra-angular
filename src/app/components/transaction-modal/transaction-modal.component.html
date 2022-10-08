@@ -18,6 +18,29 @@
 
         <div class="modal-container" *ngIf="page.includes('clients') && type==='delete'">
             <h2>{{ "Delete client " + client_name + " ?"}}</h2>
+            <div class="transaction-type-container">
+                <button
+                    type="button"
+                    class="radiobox"
+                    (click)="handleCloseModal()"
+                >
+                    <fa-icon [icon]="closeIcon" style="font-size: 20px; color: #33CC95"></fa-icon>
+                    <span>Cancel</span>
+                </button>
+                <button
+                    type="submit"
+                    class="radiobox"
+                >
+                    <fa-icon [icon]="trashIcon" style="font-size: 20px; color: #E52E4D"></fa-icon>
+                    <span>Delete</span>
+                </button>
+            </div>
+
+        </div>
+
+        <div class="modal-container" *ngIf="page.includes('account') && type==='delete'">
+            <h2>Delete account {{!(account_data.number && account_data.agency) ? "?" : ""}}</h2>
+            <h2>{{ (account_data.number && account_data.agency) ? " Num.: " + account_data.number + " Agency: " + account_data.agency + " ?" : ""}}</h2>
 
             <div class="transaction-type-container">
                 <button
@@ -37,6 +60,56 @@
                 </button>
             </div>
 
+        </div>
+
+        <div class="modal-container" *ngIf="page.includes('accounts') && (type!=='delete')">
+            <h2>{{ type==='update' ? "Update Account" : "Create Account"}}</h2>
+            <h2>{{ (account_data.number && account_data.agency) ? " Num.: " + account_data.number + " Agency: " + account_data.agency + " ?" : ""}}</h2>
+
+            <label for="agency">Agency:</label>
+            <input
+                id="agency"
+                type="text"
+                placeholder="Agency"
+                formControlName="agencia"
+            />
+
+            <label for="number">Number:</label>
+            <input
+                id="number"
+                type="text"
+                placeholder="Number"
+                formControlName="numero"
+            />
+
+            <div class="margin-16" formGroupName="cliente">
+              <label for="client_cpf">Owner CPF:</label>
+              <input
+                  id="client_cpf"
+                  type="tel"
+                  placeholder="CPF"
+                  formControlName="cpf"
+                  maxLength="11"
+                  (blur)="handleCheckClientCpf()"
+              />
+            </div>
+
+            <label for="value">Value:</label>
+            <input
+                id="value"
+                placeholder="Value"
+                type="number"
+                formControlName="saldo"
+            />
+
+            <button
+                type="button"
+                class="submit-button"
+                (click)="handleModalSubmit()"
+                [disabled]="!(form.valid && is_client_fetched)"
+            >
+                Submit
+            </button>
         </div>
 
         <div class="modal-container" *ngIf="page.includes('clients') && (type!=='delete' && type!=='account')">
@@ -133,54 +206,6 @@
             </button>
         </div>
 
-        <div class="modal-container" *ngIf="page.includes('accounts')">
-            <h2>Register transaction</h2>
-
-            <input
-                type="text"
-                placeholder="Title"
-                formControlName="nome"
-            />
-
-            <input
-                type="number"
-                placeholder="Value"
-            />
-
-            <div class="transaction-type-container">
-                <button
-                    type="button"
-                    class="radiobox"
-                ><!--onClick={() => setType("deposit")}
-                    isActive={type === "deposit"}
-                    activeColor="green"-->
-                    <img src="../../../assets/images/income.svg" alt="Income" />
-                    <span>Income</span>
-                </button>
-                <button
-                    type="button"
-                    class="radiobox"
-                ><!--onClick={() => setType("withdraw")}
-                    isActive={type === "withdraw"}
-                    activeColor="red"-->
-                    <img src="../../../assets/images/outcome.svg" alt="Outcome" />
-                    <span>Outcome</span>
-                </button>
-            </div>
-
-            <input
-                type="text"
-                placeholder="Category"
-            />
-
-            <button
-                type="button"
-                class="submit-button"
-                (click)="handleModalSubmit()"
-            >
-                Submit
-            </button>
-        </div>
 
         <div class="modal-container" *ngIf="page.includes('extract')">
             <h2>Register transaction</h2>

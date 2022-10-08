@@ -2,7 +2,11 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from 'src/environments/environment';
 import { ICliente } from '../interfaces/cliente';
-
+interface GetClientByCpfProps {
+  cpfMascarado: string,
+  observacoes: string,
+  nome: string
+}
 @Injectable({
   providedIn: 'root'
 })
@@ -26,7 +30,7 @@ export class ClientesService {
   }
 
   getClientByCpf(cpf: string) {
-    return this.http.get<ICliente>(`${this.api}/${this.endpoint}buscarPorCpf/${cpf}`);
+    return this.http.get<GetClientByCpfProps>(`${this.api}/${this.endpoint}buscarPorCpf/${cpf}`);
   }
 
   createClient(client: ICliente) {

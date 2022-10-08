@@ -1,11 +1,17 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, Renderer2, ViewChild } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { ICliente } from 'src/app/interfaces/cliente';
 import { AlertaService } from 'src/app/services/alerta.service';
 import { ClientesService } from 'src/app/services/clientes.service';
 import { ContasService } from 'src/app/services/contas.service';
+import { DataService } from 'src/app/services/data.service';
 import { IConta } from '../../interfaces/conta';
 
+interface GetClientByCpfProps {
+  cpfMascarado: string,
+  observacoes: string,
+  nome: string
+}
 @Component({
   selector: 'app-contas',
   templateUrl: './contas.component.html',
@@ -13,14 +19,22 @@ import { IConta } from '../../interfaces/conta';
 })
 export class ContasComponent {
 
+  @ViewChild('submit_button') submit_button: ElementRef;
+
   status: string = "";
-  errorMessage: string = "";
+  error_message: string = "";
 
   accounts: IConta[] = [];
+  clients: ICliente[] = [];
 
-  actualAccountIdForEdition: number = 0;
-  isModalForEditing: boolean = false;
-  isClientFetched: boolean = false;
+  actual_account_id: number = 0;
+  actual_account_data: { number: string, agency: string } = {
+    number: "",
+    agency: ""
+  }
+  modal_type: "create" | "update" | "delete" | "";
+  is_modal_open: boolean = false;
+  is_client_fetched: boolean = false;
 
   formInitialValue: IConta = {
     agencia: "",
@@ -40,9 +54,13 @@ export class ContasComponent {
     private contaService: ContasService,
     private clienteService: ClientesService,
     private alertsService: AlertaService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private renderer: Renderer2,
+    private dataeService: DataService
   ) {
+    this.dataeService.clickCreate().subscribe(() => { this.handleCreateModalOpen() });
     this.getAllAccounts();
+    this.getAllClients();
   }
 
   accountForm = this.fb.group({
@@ -64,8 +82,32 @@ export class ContasComponent {
   });
 
   resetForm() {
-    this.isModalForEditing = false;
+    this.modal_type = "";
+    this.actual_account_data = {
+      number: "",
+      agency: ""
+    };
+    this.formInitialValue = {
+      agencia: "",
+      numero: "",
+      saldo: 0,
+      cliente: {
+        nome: "",
+        email: "",
+        cpf: "",
+        observacoes: "",
+        ativo: true,
+        id: 0
+      }
+    }
+    this.handleCloseModal();
+    this.actual_account_id = 0;
     this.accountForm.patchValue(this.formInitialValue);
+  }
+
+  handleCloseModal() {
+    this.is_modal_open = false;
+    this.modal_type = "";
   }
 
   onSubmit() {
@@ -74,12 +116,18 @@ export class ContasComponent {
       return;
     }
 
-    if (this.isModalForEditing) {
-      this.handleAccountEdition();
-      return;
+    if (this.modal_type === "update") {
+      return this.handleAccountEdition();
     }
 
-    this.handleAccountCreation();
+    if (this.modal_type === "create") {
+      return this.handleAccountCreation();
+    }
+
+    if (this.modal_type === "delete") {
+      return this.handleAccountDeletion();
+    }
+
   }
 
   getAllAccounts() {
@@ -89,17 +137,27 @@ export class ContasComponent {
     });
   }
 
+  getAllClients() {
+    this.clienteService.getAllClients().subscribe((clients: ICliente[]) => {
+      this.clients = clients;
+    });
+  }
+
   getAccountById(id: number) {
-    this.isModalForEditing = true;
-    this.actualAccountIdForEdition = id;
+    this.modal_type = "update";
+    this.is_modal_open = true;
+    this.actual_account_id = id;
     this.accountForm.patchValue(this.formInitialValue);
 
     this.contaService.getAccountById(id).subscribe({
       next: (account: IConta) => {
-        this.isClientFetched = true;
+        this.is_client_fetched = true;
 
         const { numero, agencia, cliente, saldo } = account;
-
+        this.actual_account_data = {
+          number: numero,
+          agency: agencia,
+        }
         this.accountForm.patchValue({
           numero,
           agencia,
@@ -108,8 +166,8 @@ export class ContasComponent {
         });
       },
       error: error => {
-        this.errorMessage = error.message;
-        console.error(this.errorMessage);
+        this.error_message = error.message;
+        console.error(this.error_message);
         this.alertsService.errorAlert("Ocorreu um erro ao buscar as informacoes da conta")
       }
     })
@@ -128,25 +186,31 @@ export class ContasComponent {
     });
   }
 
-  // alterar isso esta bugando quando eh pra editar
-  getClientForCreationOrEdition(cpf: any) {
-    this.clienteService.getClientByCpf(cpf.value).subscribe({
-      next: (cliente: ICliente) => {
+  getClientByCpf() {
+    this.is_client_fetched = false;
+    this.clienteService.getClientByCpf(this.accountForm.value['cliente']!['cpf'] as string).subscribe({
+      next: (cliente: GetClientByCpfProps) => {
+
+        const filteredClient: ICliente = this.clients.filter(client =>
+        (client.cpf.substring(0, 3) === cliente.cpfMascarado.substring(0, 3)
+          && (client.nome === cliente.nome)
+          && (client.observacoes === cliente.observacoes))
+        )[0]
 
         this.accountForm.patchValue({
           ...this.accountForm.value,
           cliente: {
-            ...cliente
+            ...filteredClient
           }
         });
 
-        this.isClientFetched = true;
+        this.is_client_fetched = true;
       },
       error: error => {
-        this.isClientFetched = false;
-        this.errorMessage = error.message;
+        this.is_client_fetched = false;
+        this.error_message = error.message;
         console.error("There was an error!" + error.message);
-        this.alertsService.errorAlert("Nao existe nenhuma conta vinculada a esse cpf!");
+        this.alertsService.errorAlert("This CPF does not match with any existing client.");
       }
     })
   }
@@ -163,22 +227,19 @@ export class ContasComponent {
 
           this.alertsService.successAlert(this.status);
 
-          const close_button: any = document.querySelector('#btn-close');
-          close_button!.click();
-
           this.accountForm.patchValue(this.formInitialValue);
-          this.isClientFetched = false;
         },
         error: error => {
-          this.errorMessage = error.message;
+          this.error_message = error.message;
           console.error('There was an error!', error);
         }
       });
   }
 
   handleAccountEdition() {
-    this.contaService.updateAccountById(this.actualAccountIdForEdition, {
+    this.contaService.updateAccountById(this.actual_account_id, {
       ...this.accountForm.value,
+      id: this.actual_account_id
     } as IConta)
       .subscribe({
         next: data => {
@@ -188,32 +249,62 @@ export class ContasComponent {
 
           this.alertsService.successAlert(this.status);
 
-          const close_button: any = document.querySelector('#btn-close');
-          close_button!.click();
-
           this.accountForm.patchValue(this.formInitialValue);
 
-          this.isModalForEditing = false;
+          this.resetForm();
         },
         error: error => {
-          this.errorMessage = error.message;
+          this.error_message = error.message;
           console.error('There was an error!', error);
         }
       });
   }
 
-  handleAccountDeletion(id: number) {
-    this.contaService.deleteAccountById(id)
+  handleAccountDeletion() {
+    this.contaService.deleteAccountById(this.actual_account_id)
       .subscribe({
         next: data => {
           this.status = 'Delete successful';
           this.alertsService.successAlert(this.status)
           this.getAllAccounts();
+          this.resetForm();
         },
         error: error => {
-          this.errorMessage = error.message;
+          this.error_message = error.message;
           console.error('There was an error!', error);
         }
       });
+  }
+
+  handleSubmitModal() {
+    this.renderer.selectRootElement(this.submit_button["nativeElement"]).click();
+  }
+
+  handleDeleteModalOpen(id: number) {
+    this.resetForm();
+    this.actual_account_id = id;
+    this.modal_type = "delete";
+    this.is_modal_open = true;
+
+    this.contaService.getAccountById(id)
+      .subscribe({
+        next: (conta: IConta) => {
+          const { id, ...rest } = conta
+          this.actual_account_data = {
+            number: rest.numero,
+            agency: rest.agencia
+          };
+          this.accountForm.patchValue(rest);
+        },
+        error: error => {
+          this.error_message = error.message;
+          console.error('There was an error!', this.error_message);
+        }
+      })
+  }
+
+  handleCreateModalOpen() {
+    this.is_modal_open = true;
+    this.modal_type = "create";
   }
 }

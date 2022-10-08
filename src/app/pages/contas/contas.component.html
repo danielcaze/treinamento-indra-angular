@@ -36,7 +36,7 @@
                 id="account-balance"
                 formControlName="saldo"
             >
-          </div> 
+          </div>
           <div class="mb-3" formGroupName="cliente">
             <label for="account-client" class="col-form-label">Cpf do cliente:</label>
             <input
@@ -49,7 +49,7 @@
                 (blur)="getClientForCreationOrEdition($event.target)"
                 formControlName="cpf"
             >
-          </div>        
+          </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
             <button type="submit" class="btn btn-primary" [disabled]="!(accountForm.valid && isClientFetched)">Enviar</button>
@@ -148,6 +148,22 @@
         </table>
     </div>
 </div> -->
+<form [formGroup]="accountForm" (ngSubmit)="onSubmit()">
+  <app-transaction-modal
+    [is_open]="is_modal_open"
+    [type]="modal_type"
+    [is_client_fetched]="is_client_fetched"
+    [account_data]="actual_account_data"
+    (onModalClose)="resetForm()"
+    (onModalSubmit)="handleSubmitModal()"
+    (checkClientCpf)="getClientByCpf()"
+  ></app-transaction-modal>
+  <button #submit_button type="submit" class="hidden-button-submit"></button>
+</form>
 <div>
-  <app-table [accounts]="accounts"></app-table>
+  <app-table
+    [accounts]="accounts"
+    (accountDeletion)="handleDeleteModalOpen($event)"
+    (getAccountById)="getAccountById($event)"
+  ></app-table>
 </div>

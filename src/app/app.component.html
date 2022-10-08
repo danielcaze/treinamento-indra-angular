@@ -1,6 +1,6 @@
-<app-header></app-header>
+<app-header [page]="page"></app-header>
 
 <main class="dashboard-container">
-    <app-summary></app-summary>
+    <app-summary [page]="page"></app-summary>
     <router-outlet></router-outlet>
 </main>

@@ -13,7 +13,7 @@
                 <th scope="col">Agency</th>
                 <th scope="col">Number</th>
                 <th scope="col">Balance</th>
-                <th scope="col">Owner</th>
+                <th scope="col">Owner name</th>
                 <th scope="col">Actions</th>
             </tr>
             <tr *ngIf="page.includes('extract')">
@@ -77,6 +77,22 @@
                     <td>{{ account.numero }}</td>
                     <td>{{ account.saldo }}</td>
                     <td>{{ account.cliente ? account.cliente.nome : "'This account does not have an Client.'" }}</td>
+                    <td class="icons">
+                        <button
+                            class="action-button"
+                            title="Update client"
+                            (click)="handleGetAccountById(account.id!)"
+                        >
+                            <fa-icon [icon]="pencilIcon" style="font-size: 17px"></fa-icon>
+                        </button>
+                        <button
+                            class="action-button"
+                            title="Delete client"
+                            (click)="handleDeleteAccount(account.id!)"
+                        >
+                            <fa-icon [icon]="trashIcon" style="font-size: 17px"></fa-icon>
+                        </button>
+                    </td>
                 </tr>
             </ng-container>
             <!-- <ng-container *ngIf="page==='extract'">

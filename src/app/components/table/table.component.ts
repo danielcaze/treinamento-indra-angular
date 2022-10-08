@@ -17,6 +17,8 @@ export class TableComponent implements OnInit {
   @Output() clientDeletion: EventEmitter<any> = new EventEmitter();
   @Output() getClientById: EventEmitter<any> = new EventEmitter();
   @Output() accountCreation: EventEmitter<any> = new EventEmitter();
+  @Output() accountDeletion: EventEmitter<any> = new EventEmitter();
+  @Output() getAccountById: EventEmitter<any> = new EventEmitter();
 
   trashIcon = faTrash;
   pencilIcon = faPencil;
@@ -41,6 +43,14 @@ export class TableComponent implements OnInit {
 
   handleCreateAccount(client: ICliente) {
     this.accountCreation.emit(client);
+  }
+
+  handleDeleteAccount(id: number) {
+    this.accountDeletion.emit(id)
+  }
+
+  handleGetAccountById(id: number) {
+    this.getAccountById.emit(id)
   }
 
 }

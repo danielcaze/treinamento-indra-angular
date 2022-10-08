@@ -9,23 +9,13 @@ import { delay, filter } from 'rxjs';
 })
 export class HeaderComponent implements OnInit {
 
-  page: string;
+  @Input() page: string;
 
   constructor(
-    private dataService: DataService,
-    private route: Router
+    private dataService: DataService
   ) { }
 
   ngOnInit(): void {
-    this.page = String(this.route.url);
-    this.route.events
-      .pipe(
-        delay(10),
-        filter((e) => e instanceof NavigationEnd),
-      )
-      .subscribe((event: any) => {
-        this.page = event.url;
-      });
   }
 
 
